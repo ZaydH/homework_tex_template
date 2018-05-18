@@ -8,12 +8,13 @@
 \usepackage{fullpage}
 \usepackage[skip=4pt]{caption}      % ``skip'' sets the spacing between the figure and the caption.
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta,decorations.markings,shadows,positioning,calc}
 \usepackage{pgfplots}     % Needed for plotting
 \pgfplotsset{compat=newest}
 \usepgfplotslibrary{fillbetween}    % Allow for highlighting under a curve
 \usepackage{amsmath}      % Allows for piecewise functions using the ``cases'' construct
 \usepackage{siunitx}      % Allows for ``S'' alignment in table to align by decimal point
-\usepackage{enumitem}     % Reference enumerated item lists.
+%\usepackage{enumitem}     % Reference enumerated item lists.
 
 \usepackage[obeyspaces,spaces]{url} % Used for typesetting with the ``path'' command
 \usepackage[hidelinks]{hyperref}    % Make the cross references clickable hyperlinks
@@ -23,8 +24,18 @@
 \usepackage{bm}           % Allows for bolding math symbols.
 \usepackage{tabto}        % Allows to tab to certain point on a line
 \usepackage{float}
+\usepackage{subcaption}   % Allows use of the ``subfigure'' environment
+\usepackage{enumerate}    % Allow enumeration other than just numbers
 
+\usepackage[noend]{algpseudocode}
+\usepackage[Algorithm,ruled]{algorithm}
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
 
+\usepackage{mathtools} % for "\DeclarePairedDelimiter" macro
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
 
 %---------------------------------------------------%
 %     Define Distances Used for Document Margins    %
@@ -35,9 +46,6 @@
 %\setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
 \setlength{\oddsidemargin}{\defaultleftmargin}
-
-
-
 
 %---------------------------------------------------%
 %      Configure the Document Header and Footer     %
@@ -63,10 +71,14 @@
 %---------------------------------------------------%
 % Define the Environments for the Problem Inclusion %
 %---------------------------------------------------%
-\usepackage{scrextend}      
-\newcounter{subProbCount}     % Initialize the subproblem counter
+\usepackage{scrextend}
 \newcounter{problemCount}
 \setcounter{problemCount}{0}  % Reset the subproblem counter
+
+\newcounter{subProbCount}[problemCount]   % Reset subProbCount any time problemCount changes.
+\renewcommand{\thesubProbCount}{\alph{subProbCount}}  % Make it so the counter is referenced as a number
+
+
 \newenvironment{problemshell}{
   \begin{addmargin}[\questionleftmargin]{0em}
     \par%
@@ -74,29 +86,30 @@
     \leftskip=0pt\rightskip=0pt%
     \setlength{\parindent}{0pt}
     \bfseries
-}
-{
+  }
+  {
     \par\medskip
   \end{addmargin}
 }
-\newenvironment{problem}[3]
+\newenvironment{problem}
 {%
+  \refstepcounter{problemCount} % Increment the subproblem counter.  This must be before the exercise to ensure proper numbering of claims and lemmas.
   \begin{problemshell}
-    \noindent \textit{Chapter \##1.#2, Exercise~\##3} \\
-}
-{
+    \noindent \textit{Exercise~\#\arabic{problemCount}} \\
+  }
+  {
   \end{problemshell}
-  \setcounter{subProbCount}{1} % Reset the subproblem counter
+  %  \setcounter{subProbCount}{0} % Reset the subproblem counter
 }
 \newenvironment{subproblem}
 {%
   \begin{problemshell}
+    \refstepcounter{subProbCount} % Increment the subproblem counter
     \setlength{\leftskip}{\hangindentdistance}
     % Print the subproblem count and offset to the left
     \hspace{-\hangindentdistance}(\alph{subProbCount}) \tabto{0pt}
-}
-{
-    \stepcounter{subProbCount} % Increment the subproblem counter
+  }
+  {
   \end{problemshell}
 }
 
@@ -110,13 +123,33 @@
   \csname endalign*\endcsname
 }
 
+%---------------------------------------------------%
+%      Define commands for coloring the text.       %
+%---------------------------------------------------%
+
+\newcommand{\red}[1]{{\color{red} #1}}
+\newcommand{\blue}[1]{{\color{blue} #1}}
+\newcommand{\green}[1]{{\color{green} #1}}
+
+%---------------------------------------------------%
+% Define the Environments for the Problem Inclusion %
+%---------------------------------------------------%
+
+\usepackage{amsthm}       % Allows use of the ``proof'' environment.
+% Number lemmas and claims using the problem count
+\newtheorem{claim}{Claim}[problemCount]
+%\newtheorem*{claim*}{Claim}
+\newtheorem{lemma}{Lemma}[problemCount]
+
+\newcommand{\degree}[1]{\textrm{deg}(#1)}
+
 
 
 
 \begin{document}
   \maketitle
 
-  \begin{problem}{<Chapter Number>}{<Section Number>}{<Problem Number>}
+  \begin{problem}
     Problem first line
 
     Problem second line
